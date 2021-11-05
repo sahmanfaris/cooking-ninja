@@ -15,14 +15,12 @@ export default function Home() {
     db.collection('recipes')
       .get()
       .then(snapshot => {
-        console.log(snapshot)
         if (snapshot.empty) {
           setError('No recipes to load')
           setIsPending(false)
         } else {
           let results = []
           snapshot.docs.forEach(doc => {
-            console.log(doc)
             results.push({ ...doc.data(), id: doc.id })
           })
           setData(results)
