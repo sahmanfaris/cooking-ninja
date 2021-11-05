@@ -1,54 +1,55 @@
-import { useState, useRef, useEffect } from 'react'
-import { useHistory } from 'react-router-dom'
-import { useFetch } from '../../hooks/useFetch'
-
+import { useState, useRef, useEffect } from "react";
+import { useHistory } from "react-router-dom";
+import { db } from "../../firebase/config";
 // styles
-import './Create.css'
+import "./Create.css";
 
 export default function Create() {
-  const [title, setTitle] = useState('')
-  const [method, setMethod] = useState('')
-  const [cookingTime, setCookingTime] = useState('')
-  const [newIngredient, setNewIngredient] = useState('')
-  const [ingredients, setIngredients] = useState([])
-  const ingredientInput = useRef(null)
-  const { postData, data } = useFetch('http://localhost:3000/recipes', 'POST')
-  let history = useHistory()
+  const [title, setTitle] = useState("");
+  const [method, setMethod] = useState("");
+  const [cookingTime, setCookingTime] = useState("");
+  const [newIngredient, setNewIngredient] = useState("");
+  const [ingredients, setIngredients] = useState([]);
+  const ingredientInput = useRef(null);
 
-  useEffect(() => {
-    data && history.push('/')
-  }, [data, history])
+  let history = useHistory();
 
-  const handleSubmit = e => {
-    e.preventDefault()
-    postData({
-      title,
-      ingredients,
-      method,
-      cookingTime: cookingTime + ' minutes',
-    })
-  }
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
-  const handleAdd = e => {
-    e.preventDefault()
-    const ing = newIngredient.trim()
+    try {
+      await db.collection("recipes").add({
+        title,
+        ingredients,
+        method,
+        cookingTime: cookingTime + " minutes",
+      });
+      history.push("/");
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const handleAdd = (e) => {
+    e.preventDefault();
+    const ing = newIngredient.trim();
 
     if (ing && !ingredients.includes(ing)) {
-      setIngredients(prevIngredients => [...prevIngredients, newIngredient])
+      setIngredients((prevIngredients) => [...prevIngredients, newIngredient]);
     }
-    setNewIngredient('')
-    ingredientInput.current.focus()
-  }
+    setNewIngredient("");
+    ingredientInput.current.focus();
+  };
 
   return (
-    <div className='create'>
-      <h2 className='page-title'>Add a New Recipe</h2>
+    <div className="create">
+      <h2 className="page-title">Add a New Recipe</h2>
       <form onSubmit={handleSubmit}>
         <label>
           <span>Recipe title:</span>
           <input
-            type='text'
-            onChange={e => setTitle(e.target.value)}
+            type="text"
+            onChange={(e) => setTitle(e.target.value)}
             value={title}
             required
           />
@@ -56,21 +57,21 @@ export default function Create() {
 
         <label>
           <span>Recipe Ingredients:</span>
-          <div className='ingredients'>
+          <div className="ingredients">
             <input
-              type='text'
-              onChange={e => setNewIngredient(e.target.value)}
+              type="text"
+              onChange={(e) => setNewIngredient(e.target.value)}
               value={newIngredient}
               ref={ingredientInput}
             />
-            <button onClick={handleAdd} className='btn'>
+            <button onClick={handleAdd} className="btn">
               add
             </button>
           </div>
         </label>
         <p>
-          Current ingredients:{' '}
-          {ingredients.map(i => (
+          Current ingredients:{" "}
+          {ingredients.map((i) => (
             <em key={i}>{i}, </em>
           ))}
         </p>
@@ -78,7 +79,7 @@ export default function Create() {
         <label>
           <span>Recipe Method:</span>
           <textarea
-            onChange={e => setMethod(e.target.value)}
+            onChange={(e) => setMethod(e.target.value)}
             value={method}
             required
           />
@@ -87,15 +88,15 @@ export default function Create() {
         <label>
           <span>Cooking time (minutes):</span>
           <input
-            type='number'
-            onChange={e => setCookingTime(e.target.value)}
+            type="number"
+            onChange={(e) => setCookingTime(e.target.value)}
             value={cookingTime}
             required
           />
         </label>
 
-        <button className='btn'>submit</button>
+        <button className="btn">submit</button>
       </form>
     </div>
-  )
+  );
 }
